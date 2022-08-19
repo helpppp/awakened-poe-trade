@@ -1,5 +1,5 @@
 import type { ItemFilters } from './interfaces'
-import { ParsedItem, ItemCategory, ItemRarity } from '@/parser'
+import { ParsedItem, ItemCategory, ItemRarity, ItemInfluence } from '@/parser'
 import { tradeTag, PERMANENT_LEAGUES } from '../trade/common'
 import { ModifierType } from '@/parser/modifiers'
 import { BaseType, ITEM_BY_REF } from '@/assets/data'
@@ -120,6 +120,11 @@ export function createFilters (
       value: floorToBracket(item.areaLevel!, [1, 68, 73, 78, 81]),
       disabled: false
     }
+  } else if (item.category === ItemCategory.HeistContract) {
+    filters.searchExact = {
+      baseType: item.info.name,
+      baseTypeTrade: t(opts, item.info)
+    }
   } else if (item.category === ItemCategory.HeistBlueprint) {
     filters.searchRelaxed = {
       category: item.category,
@@ -172,22 +177,6 @@ export function createFilters (
     }
   }
 
-  if (item.sentinelCharge != null) {
-    filters.sentinelCharge = {
-      value: item.sentinelCharge,
-      disabled: false
-    }
-  }
-
-  if (item.quality && item.quality >= 20) {
-    if (item.category === ItemCategory.Flask) {
-      filters.quality = {
-        value: item.quality,
-        disabled: (item.quality <= 20)
-      }
-    }
-  }
-
   if (item.sockets?.linked) {
     filters.linkedSockets = {
       value: item.sockets.linked,
@@ -228,10 +217,20 @@ export function createFilters (
   }
 
   if (item.influences.length && item.influences.length <= 2) {
-    filters.influences = item.influences.map(influence => ({
-      value: influence,
-      disabled: !opts.exact
-    }))
+    if (opts.exact) {
+      filters.influences = item.influences.map(influecne => ({
+        value: influecne,
+        disabled: false
+      }))
+    } else if (item.influences.length === 1 && (
+      item.influences[0] === ItemInfluence.Shaper ||
+      item.influences[0] === ItemInfluence.Elder
+    )) {
+      filters.influences = [{
+        value: item.influences[0],
+        disabled: true
+      }]
+    }
   }
 
   if (item.itemLevel) {
@@ -253,7 +252,7 @@ export function createFilters (
         // TODO limit level by item type
         filters.itemLevel = {
           value: Math.min(item.itemLevel, 86),
-          disabled: (!opts.exact || item.category === ItemCategory.Flask)
+          disabled: !opts.exact
         }
       }
     }

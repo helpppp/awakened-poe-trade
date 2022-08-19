@@ -75,7 +75,7 @@ export default defineComponent({
           }
         }
       }),
-      inputFocus (e: FocusEvent) {
+      inputFocus (e: InputEvent) {
         const target = e.target as HTMLInputElement
         target.select()
         props.filter.disabled = false
@@ -134,8 +134,7 @@ export default defineComponent({
     "Links:": "Связи:",
     "White:": "Белые:",
     "Quality:": "Качество:",
-    "Level:": "Уровень:",
-    "Charge:": "Заряд:"
+    "Level:": "Уровень:"
   },
   "cmn-Hant": {
     "Item Level:": "物品等級:",
@@ -146,8 +145,7 @@ export default defineComponent({
     "Links:": "連線:",
     "White:": "白:",
     "Quality:": "品質:",
-    "Level:": "等級:",
-    "Charge:": "充能:"
+    "Level:": "等級:"
   }
 }
 </i18n>

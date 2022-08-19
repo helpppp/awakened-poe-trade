@@ -3,7 +3,7 @@ import { calcPropBounds, propAt20Quality, QUALITY_STATS } from './calc-q20'
 import { stat, StatBetter } from '@/assets/data'
 import { ARMOUR, WEAPON, ItemCategory } from '@/parser/meta'
 import { ParsedItem } from '@/parser'
-import { ModifierType, StatRoll, StatSource } from '@/parser/modifiers'
+import { ModifierType, StatRoll } from '@/parser/modifiers'
 import { FilterTag, InternalTradeId, StatFilter } from '../interfaces'
 
 export function filterItemProp (ctx: FiltersCreationContext) {
@@ -36,8 +36,7 @@ function armourProps (ctx: FiltersCreationContext) {
     ctx.filters.push(propToFilter({
       ref: 'Armour: #',
       tradeId: 'armour.armour',
-      roll: totalQ20.roll,
-      sources: totalQ20.sources,
+      roll: totalQ20,
       disabled: !isSingleAttrArmour(item)
     }, ctx))
   }
@@ -48,8 +47,7 @@ function armourProps (ctx: FiltersCreationContext) {
     ctx.filters.push(propToFilter({
       ref: 'Evasion Rating: #',
       tradeId: 'armour.evasion_rating',
-      roll: totalQ20.roll,
-      sources: totalQ20.sources,
+      roll: totalQ20,
       disabled: !isSingleAttrArmour(item)
     }, ctx))
   }
@@ -60,8 +58,7 @@ function armourProps (ctx: FiltersCreationContext) {
     ctx.filters.push(propToFilter({
       ref: 'Energy Shield: #',
       tradeId: 'armour.energy_shield',
-      roll: totalQ20.roll,
-      sources: totalQ20.sources,
+      roll: totalQ20,
       disabled: !isSingleAttrArmour(item)
     }, ctx))
   }
@@ -72,8 +69,7 @@ function armourProps (ctx: FiltersCreationContext) {
     ctx.filters.push(propToFilter({
       ref: 'Ward: #',
       tradeId: 'armour.ward',
-      roll: totalQ20.roll,
-      sources: totalQ20.sources,
+      roll: totalQ20,
       disabled: !isSingleAttrArmour(item)
     }, ctx))
   }
@@ -84,8 +80,7 @@ function armourProps (ctx: FiltersCreationContext) {
     ctx.filters.push(propToFilter({
       ref: 'Block: #%',
       tradeId: 'armour.block',
-      roll: block.roll,
-      sources: block.sources,
+      roll: block,
       disabled: true
     }, ctx))
   }
@@ -119,9 +114,9 @@ function weaponProps (ctx: FiltersCreationContext) {
   const attackSpeed = calcPropBounds(item.weaponAS ?? 0, { incr: ['#% increased Attack Speed'], flat: [] }, item)
   const physQ20 = propAt20Quality(item.weaponPHYSICAL ?? 0, QUALITY_STATS.PHYSICAL_DAMAGE, item)
   const pdpsQ20: StatRoll = {
-    value: physQ20.roll.value * attackSpeed.roll.value,
-    min: physQ20.roll.min * attackSpeed.roll.min,
-    max: physQ20.roll.max * attackSpeed.roll.max
+    value: physQ20.value * attackSpeed.value,
+    min: physQ20.min * attackSpeed.min,
+    max: physQ20.max * attackSpeed.max
   }
 
   const eleDmg = calcPropBounds(item.weaponELEMENTAL ?? 0, {
@@ -130,9 +125,9 @@ function weaponProps (ctx: FiltersCreationContext) {
   }, item)
 
   const edps: StatRoll = {
-    value: eleDmg.roll.value * attackSpeed.roll.value,
-    min: eleDmg.roll.min * attackSpeed.roll.min,
-    max: eleDmg.roll.max * attackSpeed.roll.max
+    value: eleDmg.value * attackSpeed.value,
+    min: eleDmg.min * attackSpeed.min,
+    max: eleDmg.max * attackSpeed.max
   }
   const dps: StatRoll = {
     value: pdpsQ20.value + edps.value,
@@ -145,7 +140,6 @@ function weaponProps (ctx: FiltersCreationContext) {
       ref: 'DPS: #',
       tradeId: 'weapon.total_dps',
       roll: dps,
-      sources: [],
       disabled: false
     }, ctx))
 
@@ -153,7 +147,6 @@ function weaponProps (ctx: FiltersCreationContext) {
       ref: 'Elemental DPS: #',
       tradeId: 'weapon.elemental_dps',
       roll: edps,
-      sources: [],
       disabled: (edps.value / dps.value < 0.67),
       hidden: (edps.value / dps.value < 0.67) ? 'Elemental damage is not the main source of DPS' : undefined
     }, ctx))
@@ -164,7 +157,6 @@ function weaponProps (ctx: FiltersCreationContext) {
       ref: 'Physical DPS: #',
       tradeId: 'weapon.physical_dps',
       roll: pdpsQ20,
-      sources: [],
       disabled: !isPdpsImportant(item) || (pdpsQ20.value / dps.value < 0.67),
       hidden: (pdpsQ20.value / dps.value < 0.67) ? 'Physical damage is not the main source of DPS' : undefined
     }, ctx))
@@ -173,8 +165,7 @@ function weaponProps (ctx: FiltersCreationContext) {
   ctx.filters.push(propToFilter({
     ref: 'Attacks per Second: #',
     tradeId: 'weapon.aps',
-    roll: attackSpeed.roll,
-    sources: attackSpeed.sources,
+    roll: attackSpeed,
     dp: true,
     disabled: true
   }, ctx))
@@ -185,8 +176,7 @@ function weaponProps (ctx: FiltersCreationContext) {
     ctx.filters.push(propToFilter({
       ref: 'Critical Strike Chance: #%',
       tradeId: 'weapon.crit',
-      roll: critChance.roll,
-      sources: critChance.sources,
+      roll: critChance,
       dp: true,
       disabled: true
     }, ctx))
@@ -233,7 +223,6 @@ function propToFilter (opts: {
   ref: string
   tradeId: InternalTradeId
   roll: StatRoll
-  sources: StatSource[]
   dp?: boolean
   disabled?: StatFilter['disabled']
   hidden?: StatFilter['hidden']
@@ -266,7 +255,7 @@ function propToFilter (opts: {
   }, ctx.searchInRange, ctx.item)
 
   filter.tag = FilterTag.Property
-  filter.sources = opts.sources
+  filter.sources = []
   if (opts.disabled != null) filter.disabled = opts.disabled
   if (opts.hidden != null) filter.hidden = opts.hidden
 

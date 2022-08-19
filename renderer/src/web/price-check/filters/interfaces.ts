@@ -60,7 +60,6 @@ export interface ItemFilters {
   }
   areaLevel?: FilterNumeric
   heistWingsRevealed?: FilterNumeric
-  sentinelCharge?: FilterNumeric
   trade: {
     offline: boolean
     onlineInLeague: boolean
@@ -82,7 +81,6 @@ export interface StatFilter {
   statRef: string
   text: string
   tag: FilterTag
-  oils?: string[]
   sources: StatCalculated['sources']
   roll?: {
     value: number
@@ -135,14 +133,6 @@ export enum FilterTag {
   Synthesised = 'synthesised',
   Eldritch = 'eldritch',
   Variant = 'variant',
+  Influence = 'influence',
   Property = 'property',
-  Shaper = 'explicit-shaper',
-  Elder = 'explicit-elder',
-  Crusader = 'explicit-crusader',
-  Hunter = 'explicit-hunter',
-  Redeemer = 'explicit-redeemer',
-  Warlord = 'explicit-warlord',
-  Delve = 'explicit-delve',
-  Unveiled = 'explicit-veiled',
-  Incursion = 'explicit-incursion'
 }

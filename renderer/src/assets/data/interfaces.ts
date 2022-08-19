@@ -5,7 +5,6 @@ export interface StatMatcher {
   advanced?: string
   negate?: true
   value?: number
-  oils?: string // Amulet anointment
 }
 
 export enum StatBetter {
@@ -21,7 +20,6 @@ export interface Stat {
   better: StatBetter
   fromAreaMods?: true
   fromHeistAreaMods?: true
-  anointments?: Array<{ roll: number, oils: string }> // Ring anointments
   trade: {
     inverted?: true
     option?: true
@@ -34,6 +32,13 @@ export interface Stat {
 export interface DropEntry {
   query: string[]
   items: string[]
+}
+
+export interface BlightRecipes {
+  oils: string[]
+  recipes: {
+    [statValue: number]: number[]
+  }
 }
 
 export interface BaseType {
@@ -159,16 +164,6 @@ export interface TranslationDict {
   ELDRITCH_MOD_R4: string
   ELDRITCH_MOD_R5: string
   ELDRITCH_MOD_R6: string
-  SENTINEL_CHARGE: string
-  SHAPER_MODS: string[]
-  ELDER_MODS: string[]
-  CRUSADER_MODS: string[]
-  HUNTER_MODS: string[]
-  REDEEMER_MODS: string[]
-  WARLORD_MODS: string[]
-  DELVE_MODS: string[]
-  VEILED_MODS: string[]
-  INCURSION_MODS: string[]
   // ---
   CHAT_SYSTEM: RegExp
   CHAT_TRADE: RegExp

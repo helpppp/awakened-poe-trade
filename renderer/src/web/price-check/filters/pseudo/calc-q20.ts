@@ -1,6 +1,6 @@
 import { ParsedItem } from '@/parser'
 import { stat } from '@/assets/data'
-import { StatRoll, StatSource, statSourcesTotal } from '@/parser/modifiers'
+import { StatRoll, statSourcesTotal } from '@/parser/modifiers'
 
 export const QUALITY_STATS = {
   ARMOUR: {
@@ -48,17 +48,14 @@ export function propAt20Quality (
   total: number,
   statRefs: { flat: string[], incr: string[] },
   item: ParsedItem
-): { roll: StatRoll, sources: StatSource[] } {
-  const { incr, flat, sources } = calcPropBase(statRefs, item)
+): StatRoll {
+  const { incr, flat } = calcPropBase(statRefs, item)
   const base = calcBase(total, incr.value + (item.quality ?? 0), flat.value)
   const quality = Math.max(20, item.quality ?? 0)
   return {
-    roll: {
-      value: calcIncreased(base + flat.value, incr.value + quality),
-      min: calcIncreased(base + flat.min, incr.min + quality),
-      max: calcIncreased(base + flat.max, incr.max + quality)
-    },
-    sources: sources.map(source => ({ ...source, contributes: undefined }))
+    value: calcIncreased(base + flat.value, incr.value + quality),
+    min: calcIncreased(base + flat.min, incr.min + quality),
+    max: calcIncreased(base + flat.max, incr.max + quality)
   }
 }
 
@@ -66,27 +63,13 @@ export function calcPropBounds (
   total: number,
   statRefs: { flat: string[], incr: string[] },
   item: ParsedItem
-): { roll: StatRoll, sources: StatSource[] } {
-  const { incr, flat, sources } = calcPropBase(statRefs, item)
+): StatRoll {
+  const { incr, flat } = calcPropBase(statRefs, item)
   const base = calcBase(total, incr.value, flat.value)
   return {
-    roll: {
-      value: calcIncreased(base + flat.value, incr.value),
-      min: calcIncreased(base + flat.min, incr.min),
-      max: calcIncreased(base + flat.max, incr.max)
-    },
-    sources: (statRefs.incr.length && statRefs.flat.length)
-      ? sources.map(source => ({ ...source, contributes: undefined }))
-      : (statRefs.incr.length)
-          ? sources.map(source => ({
-            ...source,
-            contributes: {
-              value: base * source.contributes!.value / 100,
-              min: base * source.contributes!.min / 100,
-              max: base * source.contributes!.max / 100
-            }
-          }))
-          : sources
+    value: calcIncreased(base + flat.value, incr.value),
+    min: calcIncreased(base + flat.min, incr.min),
+    max: calcIncreased(base + flat.max, incr.max)
   }
 }
 
@@ -96,7 +79,6 @@ function calcPropBase (
 ) {
   const incr: StatRoll = { value: 0, min: 0, max: 0 }
   const flat: StatRoll = { value: 0, min: 0, max: 0 }
-  const sources: StatSource[] = []
 
   for (const calc of item.statsByType) {
     let total: StatRoll
@@ -111,10 +93,9 @@ function calcPropBase (
     total.value += roll.value
     total.min += roll.min
     total.max += roll.max
-    sources.push(...calc.sources)
   }
 
-  return { incr, flat, sources }
+  return { incr, flat }
 }
 
 function calcBase (total: number, incr: number, flat: number) {

@@ -27,12 +27,8 @@
       ref="tradeService"
       :filters="itemFilters"
       :item="item" />
-    <div v-if="!doSearch" class="flex justify-between items-center">
-      <div class="flex w-40" @mouseenter="handleSearchMouseenter">
-        <button class="btn" @click="doSearch = true" style="min-width: 5rem;">{{ t('Search') }}</button>
-      </div>
-      <trade-links v-if="tradeAPI === 'trade'"
-        :get-link="makeTradeLink" />
+    <div v-if="!doSearch" @mouseenter="handleSearchMouseenter">
+      <button class="btn" @click="doSearch = true">{{ t('Search') }}</button>
     </div>
     <stack-value :filters="itemFilters" :item="item"/>
     <div v-if="showSupportLinks" class="mt-auto border border-dashed p-2">
@@ -51,15 +47,14 @@ import { useI18n } from 'vue-i18n'
 import { ItemRarity, ItemCategory, ParsedItem } from '@/parser'
 import TradeListing from './trade/TradeListing.vue'
 import TradeBulk from './trade/TradeBulk.vue'
-import TradeLinks from './trade/TradeLinks.vue'
-import { apiToSatisfySearch, getTradeEndpoint } from './trade/common'
+import { apiToSatisfySearch } from './trade/common'
 import PriceTrend from './trends/PriceTrend.vue'
 import FiltersBlock from './filters/FiltersBlock.vue'
 import { createPresets } from './filters/create-presets'
 import PricePrediction from './price-prediction/PricePrediction.vue'
 import StackValue from './stack-value/StackValue.vue'
 import FilterName from './filters/FilterName.vue'
-import { CATEGORY_TO_TRADE_ID, createTradeRequest } from './trade/pathofexile-trade'
+import { CATEGORY_TO_TRADE_ID } from './trade/pathofexile-trade'
 import { AppConfig } from '@/web/Config'
 import { FilterPreset } from './filters/interfaces'
 import { PriceCheckWidget } from '../overlay/interfaces'
@@ -73,7 +68,6 @@ export default defineComponent({
     PricePrediction,
     TradeListing,
     TradeBulk,
-    TradeLinks,
     PriceTrend,
     FiltersBlock,
     FilterName,
@@ -126,8 +120,6 @@ export default defineComponent({
           (item.isVeiled)
         )
       }
-
-      tradeAPI.value = apiToSatisfySearch(props.item, itemStats.value, itemFilters.value)
     }, { immediate: true })
 
     watch(() => [props.item, doSearch.value], () => {
@@ -228,9 +220,6 @@ export default defineComponent({
         ({ id: preset.id, active: (preset.id === presets.value.active) }))),
       selectPreset (id: string) {
         presets.value.active = id
-      },
-      makeTradeLink () {
-        return `https://${getTradeEndpoint()}/trade/search/${itemFilters.value.trade.league}?q=${JSON.stringify(createTradeRequest(itemFilters.value, itemStats.value, props.item))}`
       }
     }
   }

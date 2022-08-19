@@ -1,4 +1,4 @@
-import { uIOhook, UiohookKey as Key } from 'uiohook-napi'
+import robotjs from 'robotjs'
 import { restoreClipboard } from './clipboard-saver'
 
 const PLACEHOLDER_LAST = '@last'
@@ -16,30 +16,30 @@ export function typeInChat (text: string, send: boolean) {
     if (text.startsWith(PLACEHOLDER_LAST)) {
       text = text.slice(`${PLACEHOLDER_LAST} `.length)
       clipboard.writeText(text)
-      uIOhook.keyTap(Key.Enter, [Key.Ctrl])
+      robotjs.keyTap('Enter', ['Ctrl'])
     } else if (text.endsWith(PLACEHOLDER_LAST)) {
       text = text.slice(0, -PLACEHOLDER_LAST.length)
       clipboard.writeText(text)
-      uIOhook.keyTap(Key.Enter, [Key.Ctrl])
-      uIOhook.keyTap(Key.Home)
-      uIOhook.keyTap(Key.Delete)
+      robotjs.keyTap('Enter', ['Ctrl'])
+      robotjs.keyTap('Home')
+      robotjs.keyTap('Delete')
     } else {
       clipboard.writeText(text)
-      uIOhook.keyTap(Key.Enter)
+      robotjs.keyTap('Enter')
       if (!AUTO_CLEAR.includes(text[0])) {
-        uIOhook.keyTap(Key.A, [Key.Ctrl])
+        robotjs.keyTap('A', ['Ctrl'])
       }
     }
 
-    uIOhook.keyTap(Key.V, [Key.Ctrl])
+    robotjs.keyTap('V', ['Ctrl'])
 
     if (send) {
-      uIOhook.keyTap(Key.Enter)
+      robotjs.keyTap('Enter')
       // restore the last chat
-      uIOhook.keyTap(Key.Enter)
-      uIOhook.keyTap(Key.ArrowUp)
-      uIOhook.keyTap(Key.ArrowUp)
-      uIOhook.keyTap(Key.Escape)
+      robotjs.keyTap('Enter')
+      robotjs.keyTap('ArrowUp')
+      robotjs.keyTap('ArrowUp')
+      robotjs.keyTap('Escape')
     }
   })
 }

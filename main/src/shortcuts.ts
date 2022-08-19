@@ -1,4 +1,5 @@
 import { screen, globalShortcut } from 'electron'
+import robotjs from 'robotjs'
 import { uIOhook, UiohookKey, UiohookWheelEvent } from 'uiohook-napi'
 import { pollClipboard } from './poll-clipboard'
 import { priceCheckConfig, showWidget as showPriceCheck } from './price-check'
@@ -13,7 +14,6 @@ import { typeInChat } from './game-chat'
 import { gameConfig } from './game-config'
 import { restoreClipboard } from './clipboard-saver'
 
-type UiohookKeyT = keyof typeof UiohookKey
 export const UiohookToName = Object.fromEntries(Object.entries(UiohookKey).map(([k, v]) => ([v, k])))
 
 export interface ShortcutAction {
@@ -193,9 +193,9 @@ function registerGlobal () {
     const isOk = globalShortcut.register(shortcutToElectron(entry.shortcut), () => {
       if (entry.keepModKeys) {
         const nonModKey = entry.shortcut.split(' + ').filter(key => !isModKey(key))[0]
-        uIOhook.keyToggle(UiohookKey[nonModKey as UiohookKeyT], 'up')
+        robotjs.keyToggle(nonModKey, 'up')
       } else {
-        entry.shortcut.split(' + ').reverse().forEach(key => { uIOhook.keyToggle(UiohookKey[key as UiohookKeyT], 'up') })
+        entry.shortcut.split(' + ').reverse().forEach(key => { robotjs.keyToggle(key, 'up') })
       }
 
       if (entry.action.type === 'toggle-overlay') {
@@ -256,19 +256,24 @@ function pressKeysToCopyItemText (pressedModKeys: string[] = []) {
   keys = keys.filter(key => key !== 'C' && !pressedModKeys.includes(key))
 
   for (const key of keys) {
-    uIOhook.keyToggle(UiohookKey[key as UiohookKeyT], 'down')
+    robotjs.keyToggle(key, 'down')
   }
 
   // finally press `C` to copy text
-  uIOhook.keyTap(UiohookKey.C)
+  robotjs.keyTap('C')
 
   keys.reverse()
   for (const key of keys) {
-    uIOhook.keyToggle(UiohookKey[key as UiohookKeyT], 'up')
+    robotjs.keyToggle(key, 'up')
   }
 }
 
 export function setupShortcuts () {
+  // A value of zero causes the thread to relinquish the remainder of its
+  // time slice to any other thread that is ready to run. If there are no other
+  // threads ready to run, the function returns immediately
+  robotjs.setKeyboardDelay(0)
+
   if (PoeWindow.isActive) {
     registerGlobal()
   }
@@ -300,9 +305,9 @@ export function setupShortcuts () {
 
     if (!isGameScrolling(e)) {
       if (e.rotation > 0) {
-        uIOhook.keyTap(UiohookKey.ArrowRight)
+        robotjs.keyTap('ArrowRight')
       } else if (e.rotation < 0) {
-        uIOhook.keyTap(UiohookKey.ArrowLeft)
+        robotjs.keyTap('ArrowLeft')
       }
     }
   })
@@ -322,9 +327,9 @@ function stashSearch (text: string) {
   restoreClipboard((clipboard) => {
     assertPoEActive()
     clipboard.writeText(text)
-    uIOhook.keyTap(UiohookKey.F, [UiohookKey.Ctrl])
-    uIOhook.keyTap(UiohookKey.V, [UiohookKey.Ctrl])
-    uIOhook.keyTap(UiohookKey.Enter)
+    robotjs.keyTap('F', ['Ctrl'])
+    robotjs.keyTap('V', ['Ctrl'])
+    robotjs.keyTap('Enter')
   })
 }
 
